@@ -2,13 +2,13 @@
 {
     public class Gaze : EyeCenter
     {
-        public double GazeX { get; }
+        public float GazeX { get; }
 
-        public double GazeY { get; }
+        public float GazeY { get; }
 
-        public double GazeZ { get; }
+        public float GazeZ { get; }
 
-        internal Gaze(double centerX, double centerY, double gazeX, double gazeY, double gazeZ) : base(centerX, centerY)
+        internal Gaze(float centerX, float centerY, float gazeX, float gazeY, float gazeZ) : base(centerX, centerY)
         {
             GazeX = gazeX;
             GazeY = gazeY;

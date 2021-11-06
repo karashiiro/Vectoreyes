@@ -2,11 +2,11 @@
 {
     public class EyeCenter
     {
-        public double CenterX { get; }
+        public float CenterX { get; }
 
-        public double CenterY { get; }
+        public float CenterY { get; }
 
-        internal EyeCenter(double centerX, double centerY)
+        internal EyeCenter(float centerX, float centerY)
         {
             CenterX = centerX;
             CenterY = centerY;

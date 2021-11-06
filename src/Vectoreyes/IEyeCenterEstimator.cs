@@ -4,10 +4,11 @@
     {
         /// <summary>
         /// Estimates an eye center location in the provided image. The image
-        /// provided should be a single-channel greyscale image.
+        /// provided should be a non-normalized single-channel greyscale image
+        /// in float format.
         /// </summary>
         /// <param name="image">The greyscale eye image.</param>
         /// <returns>The predicted eye center.</returns>
-        EyeCenter EstimateCenter(byte[][] image);
+        EyeCenter EstimateCenter(float[,] image);
     }
 }

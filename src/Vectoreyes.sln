@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{2797DD
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vectoreyes.Debug", "Vectoreyes.Debug\Vectoreyes.Debug.csproj", "{1A705B5E-9889-471B-B64B-C461EB14B5E6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
 		{E9A40794-3C1C-4C89-A6F1-A742D6EC748F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9A40794-3C1C-4C89-A6F1-A742D6EC748F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9A40794-3C1C-4C89-A6F1-A742D6EC748F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A705B5E-9889-471B-B64B-C461EB14B5E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A705B5E-9889-471B-B64B-C461EB14B5E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A705B5E-9889-471B-B64B-C461EB14B5E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A705B5E-9889-471B-B64B-C461EB14B5E6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
