@@ -9,17 +9,7 @@ namespace Vectoreyes
             throw new NotImplementedException();
         }
 
-        public unsafe EyeCenter EstimateCenter(byte* image, int r, int c)
-        {
-            throw new NotImplementedException();
-        }
-
         public Gaze EstimateGaze(byte[][] image)
-        {
-            throw new NotImplementedException();
-        }
-
-        public unsafe Gaze EstimateGaze(byte* image, int r, int c)
         {
             throw new NotImplementedException();
         }
