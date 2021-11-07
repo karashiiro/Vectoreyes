@@ -35,24 +35,49 @@ namespace Vectoreyes
                 CV.Convolve(temp, imageCopy, GaussianBlurY, 1, 0);
             }
 
-            // Calculate gradients
+            // Calculate gradients, gradient magnitude mean, and gradient magnitude std
             var gradResultX = new float[rows, cols];
             var gradResultY = new float[rows, cols];
             CV.CentralDifferenceGradientX(imageCopy, gradResultX);
             CV.CentralDifferenceGradientY(imageCopy, gradResultY);
 
+            var gradMags = new float[rows, cols];
+            var gradMagStd = 0f;
+            var gradMagMean = 0f;
             var gradResult = new float[rows, cols, 2];
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    // Scale gradients to unit length
-                    var gradMag = (float)Math.Sqrt(Math.Pow(gradResultX[r, c], 2) + Math.Pow(gradResultY[r, c], 2));
-                    if (gradMag < 5)
+                    gradMags[r, c] = (float)Math.Sqrt(Math.Pow(gradResultX[r, c], 2) + Math.Pow(gradResultY[r, c], 2));
+                    gradMagMean += gradMags[r, c];
+                }
+            }
+            gradMagMean /= rows * cols;
+
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    gradMagStd += (float)Math.Pow(gradMags[r, c] - gradMagMean, 2);
+                }
+            }
+            gradMagStd = (float)Math.Sqrt(gradMagStd / (rows * cols - 1));
+
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    var gradMag = gradMags[r, c];
+
+                    // Ignore all gradients below a threshold
+                    var gradThreshold = 0.3 * gradMagStd + gradMagMean;
+                    if (gradMag < gradThreshold)
                     {
                         continue;
                     }
 
+                    // Scale gradients to unit length
                     gradResult[r, c, 0] = gradResultX[r, c] / gradMag;
                     gradResult[r, c, 1] = gradResultY[r, c] / gradMag;
                 }

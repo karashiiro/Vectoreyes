@@ -116,6 +116,13 @@ namespace Vectoreyes
             {
                 for (var c = 0; c < gradient.GetLength(1); c++)
                 {
+                    var gX = gradient[r, c, 0];
+                    var gY = gradient[r, c, 1];
+                    if (gX == 0 && gY == 0)
+                    {
+                        continue;
+                    }
+
                     // Calculate displacement
                     var dX = c - centerC;
                     var dY = r - centerR;
@@ -127,13 +134,6 @@ namespace Vectoreyes
                     var dMag = (float)Math.Sqrt(Math.Pow(dX, 2) + Math.Pow(dY, 2));
                     var dXf = dX / dMag;
                     var dYf = dY / dMag;
-
-                    var gX = gradient[r, c, 0];
-                    var gY = gradient[r, c, 1];
-                    if (gX == 0 && gY == 0)
-                    {
-                        continue;
-                    }
 
                     // Dot product of displacement and gradient.
                     // https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv/#the-little-thing-that-he-didnt-mention
