@@ -90,35 +90,16 @@ namespace Vectoreyes
             CV.Negative(imageCopy, weights);
 
             // Predict eye center
-            var maxScorePre = 0f;
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
                     centerScores[r, c] = CV.EyeCenterScore(weights, gradResult, r, c);
-                    if (centerScores[r, c] > maxScorePre)
-                    {
-                        maxScorePre = centerScores[r, c];
-                    }
                 }
             }
             
-            var maxScore = 0f;
-            var maxR = -1;
-            var maxC = -1;
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    if (centerScores[r, c] > maxScore)
-                    {
-                        maxScore = centerScores[r, c];
-                        maxR = r;
-                        maxC = c;
-                    }
-                }
-            }
+            var (maxR, maxC) = Utils.Argmax2D(centerScores);
 
             return new EyeCenter(maxC, maxR);
         }
