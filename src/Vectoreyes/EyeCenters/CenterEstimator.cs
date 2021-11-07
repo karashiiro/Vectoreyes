@@ -102,7 +102,7 @@ namespace Vectoreyes.EyeCenters
             {
                 for (var c = x; c < colMax; c++)
                 {
-                    centerScores[r, c] = Score(weights, gradResult, r, c);
+                    centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                 }
             }
 
@@ -119,10 +119,8 @@ namespace Vectoreyes.EyeCenters
         /// Implemented based on Timm, F. and Barth, E. (2011). "Accurate eye centre localisation by means of gradients",
         /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
         /// </summary>
-        private static float Score(float[,] weights, float[,,] gradient, int centerR, int centerC)
+        private static float Score(float[,] weights, float[,,] gradient, int rows, int cols, int centerR, int centerC)
         {
-            var rows = gradient.GetLength(0);
-            var cols = gradient.GetLength(1);
             var score = 0f;
             for (var r = 0; r < rows; r++)
             {
@@ -143,7 +141,7 @@ namespace Vectoreyes.EyeCenters
                         continue;
                     }
 
-                    var dMag = Math.Sqrt(dX * dX + dY * dY);
+                    var dMag = (float)Math.Sqrt(dX * dX + dY * dY);
                     var dXf = dX / dMag;
                     var dYf = dY / dMag;
 
@@ -154,7 +152,7 @@ namespace Vectoreyes.EyeCenters
                     // the gradient vectors along the iris edge always point away from the sclera.
                     // At the center, the gradient vectors will be pointing in the same direction
                     // as the displacement vector. (continues below)
-                    var dg = (float)Math.Max(0, dXf * gX + dYf * gY);
+                    var dg = Math.Max(0, dXf * gX + dYf * gY);
 
                     // In this step, we would normally square the dot product, presumably in order
                     // to penalize very small intermediate results and give a bonus to very large
