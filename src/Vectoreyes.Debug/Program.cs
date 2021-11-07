@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Net.Http;
 
@@ -11,45 +12,27 @@ namespace Vectoreyes.Debug
             Console.WriteLine("Downloading image...");
             using var http = new HttpClient();
             var imageRaw = http.GetStreamAsync(
-                "https://images.pexels.com/photos/10057620/pexels-photo-10057620.jpeg?cs=srgb&dl=pexels-yaroslava-borz-10057620.jpg&fm=jpg").GetAwaiter().GetResult();
+                "https://images.pexels.com/photos/32267/pexels-photo.jpg?cs=srgb&dl=pexels-skitterphoto-32267.jpg&fm=jpg").GetAwaiter().GetResult();
 
             Console.WriteLine("Preparing image...");
-            var srcImage = new Bitmap(Image.FromStream(imageRaw));
-            var image = new float[srcImage.Height, srcImage.Width];
-            for (var r = 0; r < srcImage.Height; r++)
+            var fullImage = new Bitmap(Image.FromStream(imageRaw));
+            var srcImage = new Bitmap(fullImage.Width / 32, fullImage.Height / 32);
+            using (var g = Graphics.FromImage(srcImage))
             {
-                for (var c = 0; c < srcImage.Width; c++)
-                {
-                    var px = srcImage.GetPixel(c, r);
-                    image[r, c] = px.R * 0.2126f + px.G * 0.7152f + px.B * 0.0722f;
-                }
+                var dstRect = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
+                var srcRect = new Rectangle(0, 0, fullImage.Width, fullImage.Height);
+                g.DrawImage(fullImage, dstRect, srcRect, GraphicsUnit.Pixel);
             }
+            
+            Console.WriteLine("Target dimensions: ({0}, {1})", srcImage.Width, srcImage.Height);
 
-            Console.WriteLine("Blurring...");
-            var blurX = new[,] { { 1 / 4f, 1 / 2f, 1 / 4f } };
-            var blurY = new[,] { { 1 / 4f }, { 1 / 2f }, { 1 / 4f } };
+            var timer = new Stopwatch();
+            timer.Start();
+            var eyeCenter = new VectoreyesEstimator().EstimateCenter(srcImage);
+            timer.Stop();
 
-            // Create just one extra matrix that we reuse for performance
-            var temp = new float[srcImage.Height, srcImage.Width];
-            for (var i = 0; i < 2; i++)
-            {
-                // Write from image into temp
-                CV.Convolve(image, temp, blurX, 0, 1);
-
-                // Write from temp back into image
-                CV.Convolve(temp, image, blurY, 1, 0);
-            }
-
-            Console.WriteLine("Saving image...");
-            using var output = new Bitmap(srcImage.Width, srcImage.Height);
-            for (var r = 0; r < srcImage.Height; r++)
-            {
-                for (var c = 0; c < srcImage.Width; c++)
-                {
-                    output.SetPixel(c, r, Color.FromArgb((int)image[r, c], (int)image[r, c], (int)image[r, c]));
-                }
-            }
-            output.Save("output.bmp");
+            Console.WriteLine("Predicted center: ({0}, {1})", eyeCenter.CenterX, eyeCenter.CenterY);
+            Console.WriteLine("Calculation time: {0}ms", timer.ElapsedMilliseconds);
         }
     }
 }

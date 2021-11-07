@@ -1,7 +1,16 @@
-﻿namespace Vectoreyes
+﻿using System.Drawing;
+
+namespace Vectoreyes
 {
     public interface IEyeCenterEstimator
     {
+        /// <summary>
+        /// Estimates an eye center location in the provided image.
+        /// </summary>
+        /// <param name="image">The eye image.</param>
+        /// <returns>The predicted eye center.</returns>
+        EyeCenter EstimateCenter(Bitmap image);
+
         /// <summary>
         /// Estimates an eye center location in the provided image. The image
         /// provided should be a non-normalized single-channel greyscale image
