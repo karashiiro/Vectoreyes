@@ -15,12 +15,13 @@ namespace Vectoreyes.Debug
 
             Console.WriteLine("Preparing image...");
             var srcImage = new Bitmap(Image.FromStream(imageRaw));
-            using var image = new DirectBitmap(srcImage.Width, srcImage.Height);
+            var image = new float[srcImage.Height, srcImage.Width];
             for (var r = 0; r < srcImage.Height; r++)
             {
                 for (var c = 0; c < srcImage.Width; c++)
                 {
-                    image.SetPixel(c, r, srcImage.GetPixel(c, r));
+                    var px = srcImage.GetPixel(c, r);
+                    image[r, c] = px.R * 0.2126f + px.G * 0.7152f + px.B * 0.0722f;
                 }
             }
 
@@ -28,9 +29,9 @@ namespace Vectoreyes.Debug
             var blurX = new[,] { { 1 / 4f, 1 / 2f, 1 / 4f } };
             var blurY = new[,] { { 1 / 4f }, { 1 / 2f }, { 1 / 4f } };
 
-            // Create just one extra canvas that we reuse for performance
-            using var temp = new DirectBitmap(srcImage.Width, srcImage.Height);
-            for (var i = 0; i < 10; i++)
+            // Create just one extra matrix that we reuse for performance
+            var temp = new float[srcImage.Height, srcImage.Width];
+            for (var i = 0; i < 2; i++)
             {
                 // Write from image into temp
                 CV.Convolve(image, temp, blurX, 0, 1);
@@ -40,7 +41,15 @@ namespace Vectoreyes.Debug
             }
 
             Console.WriteLine("Saving image...");
-            image.Bitmap.Save("output.bmp");
+            using var output = new Bitmap(srcImage.Width, srcImage.Height);
+            for (var r = 0; r < srcImage.Height; r++)
+            {
+                for (var c = 0; c < srcImage.Width; c++)
+                {
+                    output.SetPixel(c, r, Color.FromArgb((int)image[r, c], (int)image[r, c], (int)image[r, c]));
+                }
+            }
+            output.Save("output.bmp");
         }
     }
 }
