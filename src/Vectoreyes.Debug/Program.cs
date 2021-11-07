@@ -16,13 +16,15 @@ namespace Vectoreyes.Debug
 
             Console.WriteLine("Preparing image...");
             var fullImage = new Bitmap(Image.FromStream(imageRaw));
-            var srcImage = new Bitmap(fullImage.Width / 32, fullImage.Height / 32);
+            var srcImage = new Bitmap(fullImage.Width / 16, fullImage.Height / 16);
             using (var g = Graphics.FromImage(srcImage))
             {
                 var dstRect = new Rectangle(0, 0, srcImage.Width, srcImage.Height);
                 var srcRect = new Rectangle(0, 0, fullImage.Width, fullImage.Height);
                 g.DrawImage(fullImage, dstRect, srcRect, GraphicsUnit.Pixel);
             }
+
+            srcImage.Save("output.bmp");
             
             Console.WriteLine("Target dimensions: ({0}, {1})", srcImage.Width, srcImage.Height);
 

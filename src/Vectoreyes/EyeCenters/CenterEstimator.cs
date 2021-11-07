@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Vectoreyes.EyeCenters
 {
@@ -18,6 +19,9 @@ namespace Vectoreyes.EyeCenters
         /// <returns>An eye center estimate.</returns>
         public static EyeCenter Estimate(float[,] image, int x, int y, int w, int h)
         {
+            var beforeScoringLoop = new Stopwatch();
+            beforeScoringLoop.Start();
+            
             var rows = image.GetLength(0);
             var cols = image.GetLength(1);
 
@@ -88,6 +92,9 @@ namespace Vectoreyes.EyeCenters
             CV.Negative(image, weights);
 
             // Predict eye center
+            beforeScoringLoop.Stop();
+            Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
+
             var centerScores = new float[rows, cols];
             var rowMax = y + h;
             var colMax = x + w;
