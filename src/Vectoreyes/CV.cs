@@ -124,10 +124,12 @@ namespace Vectoreyes
         /// </summary>
         public static float EyeCenterScore(float[,] weights, float[,,] gradient, int centerR, int centerC)
         {
+            var rows = gradient.GetLength(0);
+            var cols = gradient.GetLength(1);
             var score = 0f;
-            for (var r = 0; r < gradient.GetLength(0); r++)
+            for (var r = 0; r < rows; r++)
             {
-                for (var c = 0; c < gradient.GetLength(1); c++)
+                for (var c = 0; c < cols; c++)
                 {
                     var gX = gradient[r, c, 0];
                     var gY = gradient[r, c, 1];
