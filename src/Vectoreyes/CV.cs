@@ -101,6 +101,19 @@ namespace Vectoreyes
             }
         }
 
+        public static void Negative(float[,] src, float[,] dst)
+        {
+            var rows = src.GetLength(0);
+            var cols = src.GetLength(1);
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    dst[r, c] = 255 - src[r, c];
+                }
+            }
+        }
+
         /// <summary>
         /// Calculate an eye center score from the provided weight image, gradient image, and predicted center
         /// location. The gradients provided should be calculated with the central difference gradient function.

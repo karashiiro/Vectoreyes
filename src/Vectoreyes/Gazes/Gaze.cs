@@ -1,4 +1,6 @@
-﻿namespace Vectoreyes
+﻿using Vectoreyes.EyeCenters;
+
+namespace Vectoreyes.Gazes
 {
     public class Gaze : EyeCenter
     {

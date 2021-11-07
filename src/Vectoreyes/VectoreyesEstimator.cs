@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using Vectoreyes.EyeCenters;
+using Vectoreyes.Gazes;
 
 namespace Vectoreyes
 {
@@ -85,13 +87,7 @@ namespace Vectoreyes
 
             // Calculate weights
             var weights = new float[rows, cols];
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    weights[r, c] = 255 - imageCopy[r, c];
-                }
-            }
+            CV.Negative(imageCopy, weights);
 
             // Predict eye center
             var maxScorePre = 0f;
@@ -107,8 +103,7 @@ namespace Vectoreyes
                     }
                 }
             }
-
-            var threshold = maxScorePre * 0.9f;
+            
             var maxScore = 0f;
             var maxR = -1;
             var maxC = -1;
@@ -116,11 +111,6 @@ namespace Vectoreyes
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    if (centerScores[r, c] < threshold)
-                    {
-                        centerScores[r, c] = 0;
-                    }
-
                     if (centerScores[r, c] > maxScore)
                     {
                         maxScore = centerScores[r, c];

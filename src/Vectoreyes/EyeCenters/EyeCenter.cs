@@ -1,4 +1,4 @@
-﻿namespace Vectoreyes
+﻿namespace Vectoreyes.EyeCenters
 {
     public class EyeCenter
     {

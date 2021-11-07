@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace Vectoreyes
+namespace Vectoreyes.Gazes
 {
     public interface IGazeEstimator
     {
