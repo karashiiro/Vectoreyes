@@ -122,7 +122,7 @@ namespace Vectoreyes.EyeCenters
                 {
                     var gX = gradient[r, c, 0];
                     var gY = gradient[r, c, 1];
-                    if (gX == 0 && gY == 0)
+                    if (gX + gY == 0)
                     {
                         continue;
                     }
@@ -130,7 +130,7 @@ namespace Vectoreyes.EyeCenters
                     // Calculate displacement
                     var dX = c - centerC;
                     var dY = r - centerR;
-                    if (dX == 0 && dY == 0)
+                    if (dX + dY == 0)
                     {
                         continue;
                     }
