@@ -5,6 +5,38 @@ namespace Vectoreyes
 {
     internal static class Utils
     {
+        public static float Std2D(float[,] x, float mean)
+        {
+            var rows = x.GetLength(0);
+            var cols = x.GetLength(1);
+            var std = 0f;
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    std += (x[r, c] - mean) * (x[r, c] - mean);
+                }
+            }
+            std = (float)Math.Sqrt(std / (rows * cols - 1));
+            return std;
+        }
+
+        public static float Mean2D(float[,] x)
+        {
+            var rows = x.GetLength(0);
+            var cols = x.GetLength(1);
+            var mean = 0f;
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    mean += x[r, c];
+                }
+            }
+            mean /= rows * cols;
+            return mean;
+        }
+
         public static (int, int) Argmax2D(float[,] x)
         {
             var rows = x.GetLength(0);

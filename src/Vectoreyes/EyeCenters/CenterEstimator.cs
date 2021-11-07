@@ -42,28 +42,19 @@ namespace Vectoreyes.EyeCenters
             CV.CentralDifferenceGradientY(image, gradResultY);
 
             var gradMags = new float[rows, cols];
-            var gradMagStd = 0f;
-            var gradMagMean = 0f;
             var gradResult = new float[rows, cols, 2];
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
                     gradMags[r, c] = (float)Math.Sqrt(gradResultX[r, c] * gradResultX[r, c] + gradResultY[r, c] * gradResultY[r, c]);
-                    gradMagMean += gradMags[r, c];
                 }
             }
-            gradMagMean /= rows * cols;
 
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    gradMagStd += (gradMags[r, c] - gradMagMean) * (gradMags[r, c] - gradMagMean);
-                }
-            }
-            gradMagStd = (float)Math.Sqrt(gradMagStd / (rows * cols - 1));
+            var gradMagMean = Utils.Mean2D(gradMags);
+            var gradMagStd = Utils.Std2D(gradMags, gradMagMean);
 
+            var gradThreshold = 0.6 * gradMagStd + gradMagMean;
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
@@ -71,7 +62,6 @@ namespace Vectoreyes.EyeCenters
                     var gradMag = gradMags[r, c];
 
                     // Ignore all gradients below a threshold
-                    var gradThreshold = 0.6 * gradMagStd + gradMagMean;
                     if (gradMag < gradThreshold)
                     {
                         continue;
@@ -87,6 +77,11 @@ namespace Vectoreyes.EyeCenters
             var weights = new float[rows, cols];
             CV.Negative(image, weights);
 
+            var weightMean = Utils.Mean2D(weights);
+            var weightStd = Utils.Std2D(weights, weightMean);
+
+            var weightThreshold = 0.6 * weightStd + weightMean;
+
             // Predict eye center
             beforeScoringLoop.Stop();
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
@@ -96,7 +91,11 @@ namespace Vectoreyes.EyeCenters
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
+                    // Only consider especially dark regions, e.g. not the whites of eyes
+                    if (weights[r, c] > weightThreshold)
+                    {
+                        centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
+                    }
                 }
             }
 
