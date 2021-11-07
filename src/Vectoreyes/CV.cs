@@ -126,7 +126,7 @@ namespace Vectoreyes
                     // Calculate displacement
                     var dX = c - centerC;
                     var dY = r - centerR;
-                    if (dX == dY)
+                    if (dX == 0 && dY == 0)
                     {
                         continue;
                     }
