@@ -53,8 +53,8 @@ namespace Vectoreyes.EyeCenters
 
             var gradMagMean = Utils.Mean2D(gradMags);
             var gradMagStd = Utils.Std2D(gradMags, gradMagMean);
+            var gradThreshold = 0.6f * gradMagStd + gradMagMean;
 
-            var gradThreshold = 0.6 * gradMagStd + gradMagMean;
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
@@ -79,8 +79,7 @@ namespace Vectoreyes.EyeCenters
 
             var weightMean = Utils.Mean2D(weights);
             var weightStd = Utils.Std2D(weights, weightMean);
-
-            var weightThreshold = 0.6 * weightStd + weightMean;
+            var weightThreshold = 0.6f * weightStd + weightMean;
 
             // Predict eye center
             beforeScoringLoop.Stop();
