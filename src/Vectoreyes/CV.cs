@@ -131,7 +131,7 @@ namespace Vectoreyes
                         continue;
                     }
 
-                    var dMag = (float)Math.Sqrt(Math.Pow(dX, 2) + Math.Pow(dY, 2));
+                    var dMag = Math.Sqrt(Math.Pow(dX, 2) + Math.Pow(dY, 2));
                     var dXf = dX / dMag;
                     var dYf = dY / dMag;
 
