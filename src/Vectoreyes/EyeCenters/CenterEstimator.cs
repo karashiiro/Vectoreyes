@@ -75,7 +75,7 @@ namespace Vectoreyes.EyeCenters
                     var gradMag = gradMags[r, c];
 
                     // Ignore all gradients below a threshold
-                    var gradThreshold = 0.3 * gradMagStd + gradMagMean;
+                    var gradThreshold = 0.6 * gradMagStd + gradMagMean;
                     if (gradMag < gradThreshold)
                     {
                         continue;
@@ -170,7 +170,7 @@ namespace Vectoreyes.EyeCenters
                 }
             }
 
-            return score / (weights.GetLength(0) * weights.GetLength(1));
+            return score / (rows * cols);
         }
     }
 }
