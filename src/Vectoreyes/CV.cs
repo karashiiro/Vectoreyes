@@ -113,47 +113,5 @@ namespace Vectoreyes
                 }
             }
         }
-
-        /// <summary>
-        /// Resizes the source image into the destination image.
-        /// </summary>
-        /// <param name="src">The source image.</param>
-        /// <param name="dst">The destination image.</param>
-        public static void Resize(float[,] src, float[,] dst)
-        {
-            var srcRows = src.GetLength(0);
-            var srcCols = src.GetLength(1);
-            var dstRows = dst.GetLength(0);
-            var dstCols = dst.GetLength(1);
-
-            var rowScale = (float)(srcRows - 1) / (dstRows - 1);
-            var colScale = (float)(srcCols - 1) / (dstCols - 1);
-
-            for (var r = 0; r < dstRows; r++)
-            {
-                for (var c = 0; c < dstCols; c++)
-                {
-                    var srcR = (int)Math.Floor(rowScale * r);
-                    var srcC = (int)Math.Floor(colScale * c);
-                    dst[r, c] = BilinearInterpolation(src, srcR, srcC, rowScale * r, colScale * c);
-                }
-            }
-        }
-
-        public static float BilinearInterpolation(float[,] image, int r, int c, float subPixelR, float subPixelC)
-        {
-            var rows = image.GetLength(0);
-            var cols = image.GetLength(1);
-
-            var alpha = subPixelR - r;
-            var beta = subPixelC - c;
-
-            var px1 = (1 - alpha) * (1 - beta) * image[r, c];
-            var px2 = alpha * (1 - beta) * image[Utils.Clamp(r + 1, 0, rows - 1), c];
-            var px3 = (1 - alpha) * beta * image[r, Utils.Clamp(c + 1, 0, cols - 1)];
-            var px4 = alpha * beta * image[Utils.Clamp(r + 1, 0, rows - 1), Utils.Clamp(c + 1, 0, cols - 1)];
-
-            return px1 + px2 + px3 + px4;
-        }
     }
 }
