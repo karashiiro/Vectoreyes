@@ -3,7 +3,7 @@ using System.Drawing;
 
 namespace Vectoreyes
 {
-    internal class Utils
+    internal static class Utils
     {
         public static float[,] Bitmap2GreyArray(Bitmap srcImage)
         {
