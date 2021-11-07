@@ -51,7 +51,7 @@ namespace Vectoreyes
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    gradMags[r, c] = (float)Math.Sqrt(Math.Pow(gradResultX[r, c], 2) + Math.Pow(gradResultY[r, c], 2));
+                    gradMags[r, c] = (float)Math.Sqrt(gradResultX[r, c] * gradResultX[r, c] + gradResultY[r, c] * gradResultY[r, c]);
                     gradMagMean += gradMags[r, c];
                 }
             }
@@ -61,7 +61,7 @@ namespace Vectoreyes
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    gradMagStd += (float)Math.Pow(gradMags[r, c] - gradMagMean, 2);
+                    gradMagStd += (gradMags[r, c] - gradMagMean) * (gradMags[r, c] - gradMagMean);
                 }
             }
             gradMagStd = (float)Math.Sqrt(gradMagStd / (rows * cols - 1));

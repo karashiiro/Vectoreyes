@@ -144,7 +144,7 @@ namespace Vectoreyes
                         continue;
                     }
 
-                    var dMag = Math.Sqrt(Math.Pow(dX, 2) + Math.Pow(dY, 2));
+                    var dMag = Math.Sqrt(dX * dX + dY * dY);
                     var dXf = dX / dMag;
                     var dYf = dY / dMag;
 
@@ -155,7 +155,7 @@ namespace Vectoreyes
                     // the gradient vectors along the iris edge always point away from the sclera.
                     // At the center, the gradient vectors will be pointing in the same direction
                     // as the displacement vector. (continues below)
-                    var dg = Math.Max(0, dXf * gX + dYf * gY);
+                    var dg = (float)Math.Max(0, dXf * gX + dYf * gY);
 
                     // In this step, we would normally square the dot product, presumably in order
                     // to penalize very small intermediate results and give a bonus to very large
@@ -169,7 +169,7 @@ namespace Vectoreyes
                     // but I find that keeping it reduces the number of potential centers
                     // significantly, which may impact accuracy in some cases. I couldn't find
                     // any case in which this is true, but such a case may exist.
-                    score += weights[r, c] * (float)Math.Pow(dg, 2);
+                    score += weights[r, c] * dg * dg;
                 }
             }
 
