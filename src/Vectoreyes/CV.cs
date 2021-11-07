@@ -115,67 +115,45 @@ namespace Vectoreyes
         }
 
         /// <summary>
-        /// Calculate an eye center score from the provided weight image, gradient image, and predicted center
-        /// location. The gradients provided should be calculated with the central difference gradient function.
-        /// The weights should come from taking the negative of the smoothed original image.
-        ///
-        /// Implemented based on Timm, F. and Barth, E. (2011). "Accurate eye centre localisation by means of gradients",
-        /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
+        /// Resizes the source image into the destination image.
         /// </summary>
-        public static float EyeCenterScore(float[,] weights, float[,,] gradient, int centerR, int centerC)
+        /// <param name="src">The source image.</param>
+        /// <param name="dst">The destination image.</param>
+        public static void Resize(float[,] src, float[,] dst)
         {
-            var rows = gradient.GetLength(0);
-            var cols = gradient.GetLength(1);
-            var score = 0f;
-            for (var r = 0; r < rows; r++)
+            var srcRows = src.GetLength(0);
+            var srcCols = src.GetLength(1);
+            var dstRows = dst.GetLength(0);
+            var dstCols = dst.GetLength(1);
+
+            var rowScale = (float)(srcRows - 1) / (dstRows - 1);
+            var colScale = (float)(srcCols - 1) / (dstCols - 1);
+
+            for (var r = 0; r < dstRows; r++)
             {
-                for (var c = 0; c < cols; c++)
+                for (var c = 0; c < dstCols; c++)
                 {
-                    var gX = gradient[r, c, 0];
-                    var gY = gradient[r, c, 1];
-                    if (gX == 0 && gY == 0)
-                    {
-                        continue;
-                    }
-
-                    // Calculate displacement
-                    var dX = c - centerC;
-                    var dY = r - centerR;
-                    if (dX == 0 && dY == 0)
-                    {
-                        continue;
-                    }
-
-                    var dMag = Math.Sqrt(dX * dX + dY * dY);
-                    var dXf = dX / dMag;
-                    var dYf = dY / dMag;
-
-                    // Dot product of displacement and gradient.
-                    // https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv/#the-little-thing-that-he-didnt-mention
-                    // (Paraphrasing for clarity)
-                    // The central difference gradient always points towards lighter regions, so
-                    // the gradient vectors along the iris edge always point away from the sclera.
-                    // At the center, the gradient vectors will be pointing in the same direction
-                    // as the displacement vector. (continues below)
-                    var dg = (float)Math.Max(0, dXf * gX + dYf * gY);
-
-                    // In this step, we would normally square the dot product, presumably in order
-                    // to penalize very small intermediate results and give a bonus to very large
-                    // intermediate results. This has the unfortunate side-effect of making very
-                    // negative intermediate results have an outsized impact on the objective
-                    // function, and often causing estimated centers in locations where the dot
-                    // products along the edge of the iris should be penalizing the estimated center.
-                    //
-                    // To resolve this, we choose to ignore any dot products less than zero.
-                    // It may be argued that the squaring step may also be removed at this point,
-                    // but I find that keeping it reduces the number of potential centers
-                    // significantly, which may impact accuracy in some cases. I couldn't find
-                    // any case in which this is true, but such a case may exist.
-                    score += weights[r, c] * dg * dg;
+                    var srcR = (int)Math.Floor(rowScale * r);
+                    var srcC = (int)Math.Floor(colScale * c);
+                    dst[r, c] = BilinearInterpolation(src, srcR, srcC, rowScale * r, colScale * c);
                 }
             }
+        }
 
-            return score / (weights.GetLength(0) * weights.GetLength(1));
+        public static float BilinearInterpolation(float[,] image, int r, int c, float subPixelR, float subPixelC)
+        {
+            var rows = image.GetLength(0);
+            var cols = image.GetLength(1);
+
+            var alpha = subPixelR - r;
+            var beta = subPixelC - c;
+
+            var px1 = (1 - alpha) * (1 - beta) * image[r, c];
+            var px2 = alpha * (1 - beta) * image[Utils.Clamp(r + 1, 0, rows - 1), c];
+            var px3 = (1 - alpha) * beta * image[r, Utils.Clamp(c + 1, 0, cols - 1)];
+            var px4 = alpha * beta * image[Utils.Clamp(r + 1, 0, rows - 1), Utils.Clamp(c + 1, 0, cols - 1)];
+
+            return px1 + px2 + px3 + px4;
         }
     }
 }

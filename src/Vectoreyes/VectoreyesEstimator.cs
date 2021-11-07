@@ -7,8 +7,11 @@ namespace Vectoreyes
 {
     public class VectoreyesEstimator : IEyeCenterEstimator, IGazeEstimator
     {
-        private static readonly float[,] GaussianBlurX = { { 1 / 4f, 1 / 2f, 1 / 4f } };
-        private static readonly float[,] GaussianBlurY = { { 1 / 4f }, { 1 / 2f }, { 1 / 4f } };
+        // Resizing constants
+        private const int SmallImageWidth = 128;
+        private const int SmallImageHeight = 128;
+        private const float SmallImageWidthF = 128f;
+        private const float SmallImageHeightF = 128f;
 
         public EyeCenter EstimateCenter(Bitmap image)
         {
@@ -18,90 +21,24 @@ namespace Vectoreyes
 
         public EyeCenter EstimateCenter(float[,] image)
         {
+            var rows = image.GetLength(0);
+            var cols = image.GetLength(1);
             var imageCopy = Utils.CopyFloatImage(image);
+            var smallImage = new float[SmallImageHeight, SmallImageWidth];
+            CV.Resize(imageCopy, smallImage);
 
-            var rows = imageCopy.GetLength(0);
-            var cols = imageCopy.GetLength(1);
+            var initialEstimate = CenterEstimator.Estimate(smallImage, 0, 0, SmallImageWidth, SmallImageHeight);
 
-            // Blur step:
-            // Create just one extra matrix that we reuse for performance.
-            // We need the extra matrix to avoid convolution steps affecting
-            // each other.
-            var temp = new float[rows, cols];
-            for (var i = 0; i < 6; i++)
-            {
-                // Write from imageCopy into temp
-                CV.Convolve(imageCopy, temp, GaussianBlurX, 0, 1);
+            var rowScale = rows / SmallImageHeightF;
+            var colScale = cols / SmallImageWidthF;
+            var scaledEstimateMinR = (int)(initialEstimate.CenterY * rowScale);
+            var scaledEstimateMinC = (int)(initialEstimate.CenterX * colScale);
+            var scaledEstimateMaxR = (int)Math.Ceiling((initialEstimate.CenterY + 1) * rowScale);
+            var scaledEstimateMaxC = (int)Math.Ceiling((initialEstimate.CenterX + 1) * colScale);
+            var scaledEstimateWidth = scaledEstimateMaxC - scaledEstimateMinC;
+            var scaledEstimateHeight = scaledEstimateMaxR - scaledEstimateMinR;
 
-                // Write from temp back into imageCopy
-                CV.Convolve(temp, imageCopy, GaussianBlurY, 1, 0);
-            }
-
-            // Calculate gradients, gradient magnitude mean, and gradient magnitude std
-            var gradResultX = new float[rows, cols];
-            var gradResultY = new float[rows, cols];
-            CV.CentralDifferenceGradientX(imageCopy, gradResultX);
-            CV.CentralDifferenceGradientY(imageCopy, gradResultY);
-
-            var gradMags = new float[rows, cols];
-            var gradMagStd = 0f;
-            var gradMagMean = 0f;
-            var gradResult = new float[rows, cols, 2];
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    gradMags[r, c] = (float)Math.Sqrt(gradResultX[r, c] * gradResultX[r, c] + gradResultY[r, c] * gradResultY[r, c]);
-                    gradMagMean += gradMags[r, c];
-                }
-            }
-            gradMagMean /= rows * cols;
-
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    gradMagStd += (gradMags[r, c] - gradMagMean) * (gradMags[r, c] - gradMagMean);
-                }
-            }
-            gradMagStd = (float)Math.Sqrt(gradMagStd / (rows * cols - 1));
-
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    var gradMag = gradMags[r, c];
-
-                    // Ignore all gradients below a threshold
-                    var gradThreshold = 0.3 * gradMagStd + gradMagMean;
-                    if (gradMag < gradThreshold)
-                    {
-                        continue;
-                    }
-
-                    // Scale gradients to unit length
-                    gradResult[r, c, 0] = gradResultX[r, c] / gradMag;
-                    gradResult[r, c, 1] = gradResultY[r, c] / gradMag;
-                }
-            }
-
-            // Calculate weights
-            var weights = new float[rows, cols];
-            CV.Negative(imageCopy, weights);
-
-            // Predict eye center
-            var centerScores = new float[rows, cols];
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    centerScores[r, c] = CV.EyeCenterScore(weights, gradResult, r, c);
-                }
-            }
-            
-            var (maxR, maxC) = Utils.Argmax2D(centerScores);
-
-            return new EyeCenter(maxC, maxR);
+            return CenterEstimator.Estimate(imageCopy, scaledEstimateMinC, scaledEstimateMinR, scaledEstimateWidth, scaledEstimateHeight);
         }
 
         public Gaze EstimateGaze(Bitmap image)
