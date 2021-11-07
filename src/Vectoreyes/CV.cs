@@ -42,8 +42,8 @@ namespace Vectoreyes
                     {
                         for (var kC = 0; kC < kCols; kC++)
                         {
-                            var nextR = Math.Max(Math.Min(rows - 1, r + kR - kCenterR), 0);
-                            var nextC = Math.Max(Math.Min(cols - 1, c + kC - kCenterC), 0);
+                            var nextR = Utils.Clamp(r + kR - kCenterR, 0, rows - 1);
+                            var nextC = Utils.Clamp(c + kC - kCenterC, 0, cols - 1);
                             var px = src.GetPixel(nextC, nextR);
                             red += px.R * flippedKernel[kR, kC];
                             green += px.G * flippedKernel[kR, kC];
