@@ -12,12 +12,8 @@ namespace Vectoreyes.EyeCenters
         /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
         /// </summary>
         /// <param name="image">The image to search.</param>
-        /// <param name="x">The x-coordinate of the objective function search space.</param>
-        /// <param name="y">The y-coordinate of the objective function search space.</param>
-        /// <param name="w">The width of the objective function search space.</param>
-        /// <param name="h">The height of the objective function search space.</param>
         /// <returns>An eye center estimate.</returns>
-        public static EyeCenter Estimate(float[,] image, int x, int y, int w, int h)
+        public static EyeCenter Estimate(float[,] image)
         {
             var beforeScoringLoop = new Stopwatch();
             beforeScoringLoop.Start();
@@ -96,11 +92,9 @@ namespace Vectoreyes.EyeCenters
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
             var centerScores = new float[rows, cols];
-            var rowMax = y + h;
-            var colMax = x + w;
-            for (var r = y; r < rowMax; r++)
+            for (var r = 0; r < rows; r++)
             {
-                for (var c = x; c < colMax; c++)
+                for (var c = 0; c < cols; c++)
                 {
                     centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                 }

@@ -15,10 +15,8 @@ namespace Vectoreyes
 
         public EyeCenter EstimateCenter(float[,] image)
         {
-            var rows = image.GetLength(0);
-            var cols = image.GetLength(1);
             var imageCopy = Utils.CopyFloatImage(image);
-            return CenterEstimator.Estimate(imageCopy, 0, 0, cols, rows);
+            return CenterEstimator.Estimate(imageCopy);
         }
 
         public Gaze EstimateGaze(Bitmap image)
