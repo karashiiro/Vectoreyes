@@ -82,18 +82,41 @@ namespace Vectoreyes.EyeCenters
             beforeScoringLoop.Stop();
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
-            // To save time, we only calculate the objective for every other column/row.
-            // At sufficiently high resolutions this is both fast and almost as accurate.
+            // To save time, we only calculate the objective for every 8th column/row.
+            // This gives us a rough approximation that we can refine later.
+            const int initialStep = 8;
             var centerScores = new float[rows, cols];
-            for (var r = 0; r < rows; r += 2)
+            for (var r = 0; r < rows; r += initialStep)
             {
-                for (var c = 0; c < cols; c += 2)
+                for (var c = 0; c < cols; c += initialStep)
                 {
                     centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                 }
             }
 
-            var (maxR, maxC, maxVal) = Utils.Argmax2D(centerScores);
+            // Search for better and better objectives within regions with high surrounding
+            // objectives.
+            for (var lastStep = initialStep; lastStep > 1; lastStep /= 2)
+            {
+                var (localMaxR, localMaxC) = Utils.Argmax2D(centerScores);
+                var localMaxVal = centerScores[localMaxR, localMaxC];
+                var approxThreshold = localMaxVal * 0.9f;
+                var step = lastStep / 2;
+                for (var r = 0; r < rows; r += step)
+                {
+                    for (var c = 0; c < cols; c += step)
+                    {
+                        if (centerScores[(int)(Math.Truncate(r / (float)lastStep) * lastStep), (int)(Math.Truncate(c / (float)lastStep) * lastStep)] > approxThreshold)
+                        {
+                            centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
+                        }
+                    }
+                }
+            }
+            
+            // Calculate final estimated center
+            var (maxR, maxC) = Utils.Argmax2D(centerScores);
+            var maxVal = centerScores[maxR, maxC];
 
             var bmp = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)

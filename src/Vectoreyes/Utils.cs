@@ -37,7 +37,12 @@ namespace Vectoreyes
             return mean;
         }
 
-        public static (int, int, float) Argmax2D(float[,] x)
+        /// <summary>
+        /// Calculate the position of the highest value in the array.
+        /// </summary>
+        /// <param name="x">The input 2D array.</param>
+        /// <returns>The position, in (row, col) order.</returns>
+        public static (int, int) Argmax2D(float[,] x)
         {
             var rows = x.GetLength(0);
             var cols = x.GetLength(1);
@@ -57,7 +62,7 @@ namespace Vectoreyes
                 }
             }
 
-            return (maxR, maxC, maxVal);
+            return (maxR, maxC);
         }
 
         public static float[,] Bitmap2GreyArray(Bitmap srcImage)
