@@ -82,9 +82,9 @@ namespace Vectoreyes.EyeCenters
             beforeScoringLoop.Stop();
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
-            // To save time, we only calculate the objective for every 8th column/row.
+            // To save time, we only calculate the objective for every 16th column/row.
             // This gives us a rough approximation that we can refine later.
-            const int initialStep = 8;
+            const int initialStep = 16;
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r += initialStep)
             {
@@ -106,7 +106,9 @@ namespace Vectoreyes.EyeCenters
                 {
                     for (var c = 0; c < cols; c += step)
                     {
-                        if (centerScores[(int)(Math.Truncate(r / (float)lastStep) * lastStep), (int)(Math.Truncate(c / (float)lastStep) * lastStep)] > approxThreshold)
+                        var scoreR = Math.Min(rows - 1, (int)(Math.Round(r / (float)lastStep) * lastStep));
+                        var scoreC = Math.Min(cols - 1, (int)(Math.Round(c / (float)lastStep) * lastStep));
+                        if (centerScores[scoreR, scoreC] > approxThreshold)
                         {
                             centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                         }
