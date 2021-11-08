@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace Vectoreyes.EyeCenters
 {
@@ -81,16 +82,29 @@ namespace Vectoreyes.EyeCenters
             beforeScoringLoop.Stop();
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
+            // To save time, we only calculate the objective for every other column/row.
+            // At sufficiently high resolutions this is both fast and almost as accurate.
             var centerScores = new float[rows, cols];
-            for (var r = 0; r < rows; r++)
+            for (var r = 0; r < rows; r += 2)
             {
-                for (var c = 0; c < cols; c++)
+                for (var c = 0; c < cols; c += 2)
                 {
                     centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                 }
             }
 
-            var (maxR, maxC) = Utils.Argmax2D(centerScores);
+            var (maxR, maxC, maxVal) = Utils.Argmax2D(centerScores);
+
+            var bmp = new Bitmap(cols, rows);
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    var px = (int)(255 * centerScores[r, c] / maxVal);
+                    bmp.SetPixel(c, r, Color.FromArgb(px, 255 - px, 0));
+                }
+            }
+            bmp.Save("scores.bmp");
 
             return new EyeCenter(maxC, maxR);
         }

@@ -37,7 +37,7 @@ namespace Vectoreyes
             return mean;
         }
 
-        public static (int, int) Argmax2D(float[,] x)
+        public static (int, int, float) Argmax2D(float[,] x)
         {
             var rows = x.GetLength(0);
             var cols = x.GetLength(1);
@@ -57,7 +57,7 @@ namespace Vectoreyes
                 }
             }
 
-            return (maxR, maxC);
+            return (maxR, maxC, maxVal);
         }
 
         public static float[,] Bitmap2GreyArray(Bitmap srcImage)
