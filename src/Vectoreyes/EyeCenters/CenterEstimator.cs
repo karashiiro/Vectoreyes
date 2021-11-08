@@ -89,7 +89,11 @@ namespace Vectoreyes.EyeCenters
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
             // To save time, we only calculate the objective for every 16th column/row.
-            // This gives us a rough approximation that we can refine later.
+            // This gives us a rough approximation that we can then refine by repeatedly
+            // halving the step size and calculating scores within a predicted region.
+            // This saves us a huge number of Score() calculations and allows us to
+            // calculate eye centers in high-resolution images in realistic amounts of time
+            // (400ms on the 259x155 reference image I used).
             var initialStep = 16;
 
             // Decrease the initial step if the input image is too small
@@ -98,6 +102,7 @@ namespace Vectoreyes.EyeCenters
                 initialStep /= 2;
             }
 
+            // Initial step scoring
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r += initialStep)
             {
