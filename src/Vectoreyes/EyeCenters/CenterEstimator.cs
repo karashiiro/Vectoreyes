@@ -123,7 +123,7 @@ namespace Vectoreyes.EyeCenters
             {
                 var (localMaxR, localMaxC) = Utils.Argmax2D(centerScores);
                 var localMaxVal = centerScores[localMaxR, localMaxC];
-                var approxThreshold = localMaxVal * 0.9f;
+                var approxThreshold = localMaxVal * 0.95f;
                 var step = lastStep / 2;
                 for (var r = 0; r < rows; r += step)
                 {
