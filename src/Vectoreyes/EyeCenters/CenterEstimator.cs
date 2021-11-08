@@ -29,14 +29,15 @@ namespace Vectoreyes.EyeCenters
             beforeScoringLoop.Start();
 
             // Blur step:
-            GaussianBlur.Blur(image, image, 10);
+            var imageBlurred = new float[rows, cols];
+            GaussianBlur.Blur(image, imageBlurred, 10);
 
             var bmp2 = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    var px = (int)image[r, c];
+                    var px = (int)imageBlurred[r, c];
                     bmp2.SetPixel(c, r, Color.FromArgb(px, px, px));
                 }
             }
@@ -82,7 +83,7 @@ namespace Vectoreyes.EyeCenters
 
             // Calculate weights
             var weights = new float[rows, cols];
-            CV.Negative(image, weights);
+            CV.Negative(imageBlurred, weights);
 
             // Predict eye center
             beforeScoringLoop.Stop();
