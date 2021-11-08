@@ -10,7 +10,7 @@ namespace Vectoreyes.Gazes
 
         public float GazeZ { get; }
 
-        internal Gaze(float centerX, float centerY, float gazeX, float gazeY, float gazeZ) : base(centerX, centerY)
+        internal Gaze(int centerX, int centerY, float gazeX, float gazeY, float gazeZ) : base(centerX, centerY)
         {
             GazeX = gazeX;
             GazeY = gazeY;

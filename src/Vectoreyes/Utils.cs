@@ -82,6 +82,42 @@ namespace Vectoreyes
             return image;
         }
 
+        public static void SaveScoresImage(float[,] centerScores, string filename)
+        {
+            var (maxR, maxC) = Utils.Argmax2D(centerScores);
+            var maxVal = centerScores[maxR, maxC];
+
+            var rows = centerScores.GetLength(0);
+            var cols = centerScores.GetLength(1);
+            
+            var bmp = new Bitmap(cols, rows);
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    var px = (int)(255 * centerScores[r, c] / maxVal);
+                    bmp.SetPixel(c, r, Color.FromArgb(px, 255 - px, 0));
+                }
+            }
+            bmp.Save(filename);
+        }
+
+        public static void SaveGreyImage(float[,] image, string filename)
+        {
+            var rows = image.GetLength(0);
+            var cols = image.GetLength(1);
+            var bmp = new Bitmap(cols, rows);
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    var px = (int)image[r, c];
+                    bmp.SetPixel(c, r, Color.FromArgb(px, px, px));
+                }
+            }
+            bmp.Save(filename);
+        }
+
         public static float[] CopyFloatImage(float[] src)
         {
             var dst = new float[src.Length];

@@ -49,7 +49,7 @@ namespace Vectoreyes.EyeCenters
 
             var gradMagMean = Utils.Mean2D(gradMags);
             var gradMagStd = Utils.Std2D(gradMags, gradMagMean);
-            var gradThreshold = 0.6f * gradMagStd + gradMagMean;
+            var gradThreshold = 0.9f * gradMagStd + gradMagMean;
 
             for (var r = 0; r < rows; r++)
             {
@@ -134,19 +134,7 @@ namespace Vectoreyes.EyeCenters
 
             // Calculate final estimated center
             var (maxR, maxC) = Utils.Argmax2D(centerScores);
-            var maxVal = centerScores[maxR, maxC];
-
-            var bmp = new Bitmap(cols, rows);
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    var px = (int)(255 * centerScores[r, c] / maxVal);
-                    bmp.SetPixel(c, r, Color.FromArgb(px, 255 - px, 0));
-                }
-            }
-            bmp.Save("scores.bmp");
-
+            
             return new EyeCenter(maxC, maxR);
         }
 
