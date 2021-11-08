@@ -96,7 +96,7 @@ namespace Vectoreyes.EyeCenters
             // halving the step size and calculating scores within a predicted region.
             // This saves us a huge number of Score() calculations and allows us to
             // calculate eye centers in high-resolution images in realistic amounts of time
-            // (400ms on the 259x155 reference image I used).
+            // (203ms on the 259x155 reference image I used).
             var temp1 = Math.Min(rows, cols);
             var temp2 = (int)Math.Ceiling(Math.Log(temp1) / Math.Log(2));
             var initialStep = temp2 * temp2;
