@@ -20,7 +20,7 @@ namespace Vectoreyes.EyeCenters
             var cols = image.GetLength(1);
 
             // We can't meaningfully calculate anything on an image this small.
-            if (rows < 4 || cols < 4)
+            if (rows < 4 && cols < 4)
             {
                 return new EyeCenter(-1, -1);
             }
@@ -30,18 +30,7 @@ namespace Vectoreyes.EyeCenters
 
             // Blur step:
             var imageBlurred = new float[rows, cols];
-            GaussianBlur.Blur(image, imageBlurred, 10);
-
-            var bmp2 = new Bitmap(cols, rows);
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    var px = (int)imageBlurred[r, c];
-                    bmp2.SetPixel(c, r, Color.FromArgb(px, px, px));
-                }
-            }
-            bmp2.Save("blurred.bmp");
+            GaussianBlur.Blur(image, imageBlurred, (int)Math.Sqrt(Math.Min(rows, cols)) / 2); // Radius chosen experimentally
 
             // Calculate gradients, gradient magnitude mean, and gradient magnitude std
             var gradResultX = new float[rows, cols];
@@ -90,16 +79,14 @@ namespace Vectoreyes.EyeCenters
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
 
             // To save time, we only calculate the objective for every Kth column/row,
-            // where K is the next lowest power of 2 from the minimum of the rows and columns
-            // in the image.
+            // where K is the square root of the product of the rows and columns in the
+            // image.
             //
             // This gives us a rough approximation that we can then refine by repeatedly
-            // halving the step size and calculating scores within a predicted region.
+            // square rooting the step size and calculating scores within a predicted region.
             // This saves us a huge number of Score() calculations and allows us to
             // calculate eye centers in high-resolution images in realistic amounts of time.
-            var temp1 = Math.Min(rows, cols);
-            var temp2 = (int)Math.Ceiling(Math.Log(temp1) / Math.Log(2));
-            var initialStep = temp2 * temp2;
+            var initialStep = (int)Math.Sqrt(rows * cols);
 
             var scoreTime = new Stopwatch();
             scoreTime.Start();
@@ -123,12 +110,12 @@ namespace Vectoreyes.EyeCenters
             // Search for better and better objectives within regions with high surrounding
             // objectives. We stop at a step of 2 (last step = 4), sacrificing negligible
             // accuracy for a significant speedup on larger images.
-            for (var lastStep = initialStep; lastStep > 2; lastStep /= 2)
+            for (var lastStep = initialStep; lastStep > 2; lastStep = (int)Math.Sqrt(lastStep))
             {
                 var (localMaxR, localMaxC) = Utils.Argmax2D(centerScores);
                 var localMaxVal = centerScores[localMaxR, localMaxC];
-                var approxThreshold = localMaxVal * 0.99999f;
-                var step = lastStep / 2;
+                var approxThreshold = localMaxVal * 0.999999f;
+                var step = (int)Math.Sqrt(lastStep);
                 for (var r = 0; r < rows; r += step)
                 {
                     for (var c = 0; c < cols; c += step)
@@ -207,7 +194,7 @@ namespace Vectoreyes.EyeCenters
                     // as the displacement vector. (continues below)
                     var dg = Math.Max(0, dXf * gX + dYf * gY);
 
-                    // In this step, we would normally square the dot product, presumably in order
+                    // In this step, we would normally just square the dot product, presumably in order
                     // to penalize very small intermediate results and give a bonus to very large
                     // intermediate results. This has the unfortunate side-effect of making very
                     // negative intermediate results have an outsized impact on the objective
@@ -215,11 +202,10 @@ namespace Vectoreyes.EyeCenters
                     // products along the edge of the iris should be penalizing the estimated center.
                     //
                     // To resolve this, we choose to ignore any dot products less than zero.
-                    // It may be argued that the squaring step may also be removed at this point,
-                    // but I find that keeping it reduces the number of potential centers
-                    // significantly, which may impact accuracy in some cases. I couldn't find
-                    // any case in which this is true, but such a case may exist.
-                    score += weights[r, c] * dg * dg;
+                    // The squaring step may also be removed at this point, since our dot products
+                    // are all greater than or equal to 0. In fact, doing so appears to improve
+                    // accuracy.
+                    score += dg * weights[r, c];
                 }
             }
 

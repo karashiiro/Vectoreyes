@@ -16,7 +16,7 @@ namespace Vectoreyes.Debug
 
             Console.WriteLine("Preparing image...");
             var fullImage = new Bitmap(Image.FromStream(imageRaw));
-            var srcImage = new Bitmap(fullImage.Width / 4, fullImage.Height / 4);
+            var srcImage = new Bitmap(fullImage.Width / 8, fullImage.Height / 8);
             using (var g = Graphics.FromImage(srcImage))
             {
                 var dstRect = new Rectangle(0, 0, srcImage.Width, srcImage.Height);

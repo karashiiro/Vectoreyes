@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Vectoreyes
+﻿namespace Vectoreyes
 {
     internal static class CV
     {
