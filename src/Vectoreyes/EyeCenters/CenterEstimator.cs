@@ -29,25 +29,15 @@ namespace Vectoreyes.EyeCenters
             beforeScoringLoop.Start();
 
             // Blur step:
-            // Create just one extra matrix that we reuse for performance.
-            // We need the extra matrix to avoid convolution steps affecting
-            // each other.
-            var temp = new float[rows, cols];
-            for (var i = 0; i < 6; i++)
-            {
-                // Write from imageCopy into temp
-                CV.Convolve(image, temp, Kernels.GaussianBlurX, 0, 1);
-
-                // Write from temp back into imageCopy
-                CV.Convolve(temp, image, Kernels.GaussianBlurY, 1, 0);
-            }
+            GaussianBlur.Blur(image, image, 10);
 
             var bmp2 = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    bmp2.SetPixel(c, r, Color.FromArgb((int)image[r, c], (int)image[r, c], (int)image[r, c]));
+                    var px = (int)image[r, c];
+                    bmp2.SetPixel(c, r, Color.FromArgb(px, px, px));
                 }
             }
             bmp2.Save("blurred.bmp");
