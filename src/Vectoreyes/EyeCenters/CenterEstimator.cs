@@ -77,10 +77,6 @@ namespace Vectoreyes.EyeCenters
             var weights = new float[rows, cols];
             CV.Negative(image, weights);
 
-            var weightMean = Utils.Mean2D(weights);
-            var weightStd = Utils.Std2D(weights, weightMean);
-            var weightThreshold = 0.6f * weightStd + weightMean;
-
             // Predict eye center
             beforeScoringLoop.Stop();
             Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
@@ -90,11 +86,7 @@ namespace Vectoreyes.EyeCenters
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    // Only consider especially dark regions, e.g. not the whites of eyes
-                    if (weights[r, c] > weightThreshold)
-                    {
-                        centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
-                    }
+                    centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
                 }
             }
 
