@@ -101,12 +101,6 @@ namespace Vectoreyes.EyeCenters
             var temp2 = (int)Math.Ceiling(Math.Log(temp1) / Math.Log(2));
             var initialStep = temp2 * temp2;
 
-            // Decrease the initial step if the input image is too small
-            while (initialStep > rows || initialStep > cols)
-            {
-                initialStep /= 2;
-            }
-
             // Initial step scoring
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r += initialStep)
