@@ -42,6 +42,16 @@ namespace Vectoreyes.EyeCenters
                 CV.Convolve(temp, image, Kernels.GaussianBlurY, 1, 0);
             }
 
+            var bmp2 = new Bitmap(cols, rows);
+            for (var r = 0; r < rows; r++)
+            {
+                for (var c = 0; c < cols; c++)
+                {
+                    bmp2.SetPixel(c, r, Color.FromArgb((int)image[r, c], (int)image[r, c], (int)image[r, c]));
+                }
+            }
+            bmp2.Save("blurred.bmp");
+
             // Calculate gradients, gradient magnitude mean, and gradient magnitude std
             var gradResultX = new float[rows, cols];
             var gradResultY = new float[rows, cols];
