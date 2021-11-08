@@ -23,10 +23,7 @@ namespace Vectoreyes.EyeCenters
             {
                 return new EyeCenter(-1, -1);
             }
-
-            var beforeScoringLoop = new Stopwatch();
-            beforeScoringLoop.Start();
-
+            
             // Blur step:
             var imageBlurred = new float[rows, cols];
             GaussianBlur.Blur(image, imageBlurred, rows, cols, (int)Math.Sqrt(Math.Min(rows, cols)) / 2); // Radius chosen experimentally
@@ -73,10 +70,7 @@ namespace Vectoreyes.EyeCenters
             var weights = new float[rows, cols];
             CV.Negative(imageBlurred, weights);
 
-            // Predict eye center
-            beforeScoringLoop.Stop();
-            Console.WriteLine("At scoring loop, elapsed time: {0}ms", beforeScoringLoop.ElapsedMilliseconds);
-
+            // Predict eye center:
             // To save time, we only calculate the objective for every Kth column/row,
             // where K is the square root of the product of the rows and columns in the
             // image.
@@ -86,15 +80,7 @@ namespace Vectoreyes.EyeCenters
             // This saves us a huge number of Score() calculations and allows us to
             // calculate eye centers in high-resolution images in realistic amounts of time.
             var initialStep = (int)Math.Sqrt(rows * cols);
-
-            var scoreTime = new Stopwatch();
-            scoreTime.Start();
-            var s = Score(weights, gradResult, rows, cols, rows / 2, cols / 2);
-            scoreTime.Stop();
-            Console.WriteLine("Score() execution time: {0}ms, result: {1}", scoreTime.ElapsedMilliseconds, s);
-
-            var scoreCallCount = 0;
-
+            
             // Initial step scoring
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r += initialStep)
@@ -102,7 +88,6 @@ namespace Vectoreyes.EyeCenters
                 for (var c = 0; c < cols; c += initialStep)
                 {
                     centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
-                    scoreCallCount++;
                 }
             }
 
@@ -124,14 +109,11 @@ namespace Vectoreyes.EyeCenters
                         if (centerScores[scoreR, scoreC] > approxThreshold)
                         {
                             centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
-                            scoreCallCount++;
                         }
                     }
                 }
             }
-
-            Console.WriteLine("Score() calls: {0}", scoreCallCount);
-
+            
             // Calculate final estimated center
             var (maxR, maxC) = Utils.Argmax2D(centerScores);
             
