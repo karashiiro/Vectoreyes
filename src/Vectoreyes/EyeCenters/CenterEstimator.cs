@@ -8,17 +8,16 @@ namespace Vectoreyes.EyeCenters
     {
         /// <summary>
         /// Estimates an eye center location from an image. The array passed in will be modified.
-        ///
+        /// 
         /// Implemented based on Timm, F. and Barth, E. (2011). "Accurate eye centre localisation by means of gradients",
         /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
         /// </summary>
         /// <param name="image">The image to search.</param>
+        /// <param name="rows">The number of rows in the image.</param>
+        /// <param name="cols">The number of columns in the image.</param>
         /// <returns>An eye center estimate.</returns>
-        public static EyeCenter Estimate(float[,] image)
+        public static EyeCenter Estimate(float[] image, int rows, int cols)
         {
-            var rows = image.GetLength(0);
-            var cols = image.GetLength(1);
-
             // We can't meaningfully calculate anything on an image this small.
             if (rows < 4 && cols < 4)
             {
@@ -30,13 +29,13 @@ namespace Vectoreyes.EyeCenters
 
             // Blur step:
             var imageBlurred = new float[rows, cols];
-            GaussianBlur.Blur(image, imageBlurred, (int)Math.Sqrt(Math.Min(rows, cols)) / 2); // Radius chosen experimentally
+            GaussianBlur.Blur(image, imageBlurred, rows, cols, (int)Math.Sqrt(Math.Min(rows, cols)) / 2); // Radius chosen experimentally
 
             // Calculate gradients, gradient magnitude mean, and gradient magnitude std
             var gradResultX = new float[rows, cols];
             var gradResultY = new float[rows, cols];
-            CV.CentralDifferenceGradientX(image, gradResultX);
-            CV.CentralDifferenceGradientY(image, gradResultY);
+            CV.CentralDifferenceGradientX(imageBlurred, gradResultX);
+            CV.CentralDifferenceGradientY(imageBlurred, gradResultY);
 
             var gradMags = new float[rows, cols];
             var gradResult = new float[rows, cols, 2];

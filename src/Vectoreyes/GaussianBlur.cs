@@ -10,32 +10,16 @@ namespace Vectoreyes
         // Fixed https://github.com/mdymel/superfastblur/issues/3 and made loops non-parallel to
         // be friendlier to library users.
 
-        public static void Blur(float[,] src_, float[,] dst_, int radius)
+        public static unsafe void Blur(float[] src_, float[,] dst_, int rows, int cols, int radius)
         {
-            var rows = src_.GetLength(0);
-            var cols = src_.GetLength(1);
-
-            // TODO: Tweak algorithm to avoid these copies
-            var src = new float[src_.Length];
-            var dst = new float[dst_.Length];
-            for (var r = 0; r < rows; r++)
+            fixed (float* src = &src_[0])
             {
-                for (var c = 0; c < cols; c++)
+                fixed (float* dst = &dst_[0, 0])
                 {
-                    src[r * cols + c] = src_[r, c];
-                }
-            }
-
-            var boxes = BoxSizes(radius, 3);
-            BoxBlur(src, dst, cols, rows, (boxes[0] - 1) / 2);
-            BoxBlur(dst, src, cols, rows, (boxes[1] - 1) / 2);
-            BoxBlur(src, dst, cols, rows, (boxes[2] - 1) / 2);
-
-            for (var r = 0; r < rows; r++)
-            {
-                for (var c = 0; c < cols; c++)
-                {
-                    dst_[r, c] = dst[r * cols + c];
+                    var boxes = BoxSizes(radius, 3);
+                    BoxBlur(src, dst, src_.Length, cols, rows, (boxes[0] - 1) / 2);
+                    BoxBlur(dst, src, src_.Length, cols, rows, (boxes[1] - 1) / 2);
+                    BoxBlur(src, dst, src_.Length, cols, rows, (boxes[2] - 1) / 2);
                 }
             }
         }
@@ -55,14 +39,14 @@ namespace Vectoreyes
             return sizes;
         }
 
-        private static void BoxBlur(float[] source, float[] dest, int w, int h, int r)
+        private static unsafe void BoxBlur(float* source, float* dest, int length, int w, int h, int r)
         {
-            for (var i = 0; i < source.Length; i++) dest[i] = source[i];
+            for (var i = 0; i < length; i++) dest[i] = source[i];
             BoxBlurH(dest, source, w, h, r);
             BoxBlurT(source, dest, w, h, r);
         }
 
-        private static void BoxBlurH(float[] source, float[] dest, int w, int h, int r)
+        private static unsafe void BoxBlurH(float* source, float* dest, int w, int h, int r)
         {
             var iar = (double)1 / (r + r + 1);
             for (var i = 0; i < h; i++)
@@ -92,7 +76,7 @@ namespace Vectoreyes
             }
         }
 
-        private static void BoxBlurT(float[] source, float[] dest, int w, int h, int r)
+        private static unsafe void BoxBlurT(float* source, float* dest, int w, int h, int r)
         {
             var iar = (double)1 / (r + r + 1);
             for (var i = 0; i < w; i++)

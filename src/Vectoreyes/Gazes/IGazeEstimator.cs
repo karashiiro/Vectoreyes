@@ -20,7 +20,9 @@ namespace Vectoreyes.Gazes
         /// inner corner of the eye.
         /// </summary>
         /// <param name="image">The greyscale eye image.</param>
+        /// <param name="rows">The number of rows in the image.</param>
+        /// <param name="cols">The number of columns in the image.</param>
         /// <returns>The predicted gaze and associated eye center.</returns>
-        Gaze EstimateGaze(float[,] image);
+        Gaze EstimateGaze(float[] image, int rows, int cols);
     }
 }

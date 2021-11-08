@@ -10,22 +10,22 @@ namespace Vectoreyes
         public EyeCenter EstimateCenter(Bitmap image)
         {
             var greyImage = Utils.Bitmap2GreyArray(image);
-            return EstimateCenter(greyImage);
+            return EstimateCenter(greyImage, image.Height, image.Width);
         }
 
-        public EyeCenter EstimateCenter(float[,] image)
+        public EyeCenter EstimateCenter(float[] image, int rows, int cols)
         {
             var imageCopy = Utils.CopyFloatImage(image);
-            return CenterEstimator.Estimate(imageCopy);
+            return CenterEstimator.Estimate(imageCopy, rows, cols);
         }
 
         public Gaze EstimateGaze(Bitmap image)
         {
             var greyImage = Utils.Bitmap2GreyArray(image);
-            return EstimateGaze(greyImage);
+            return EstimateGaze(greyImage, image.Height, image.Width);
         }
 
-        public Gaze EstimateGaze(float[,] image)
+        public Gaze EstimateGaze(float[] image, int rows, int cols)
         {
             throw new NotImplementedException();
         }
