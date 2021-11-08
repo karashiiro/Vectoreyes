@@ -1,11 +1,37 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing;
 
 namespace Vectoreyes.EyeCenters
 {
-    internal static class CenterEstimator
+    /// <summary>
+    /// Eye center estimation class with pre-built buffers for reuse. This class is not thread-safe.
+    /// </summary>
+    public class EyeCenterEstimator
     {
+        private readonly float[,] _imageBlurred;
+        private readonly float[,] _gradResultX;
+        private readonly float[,] _gradResultY;
+        private readonly float[,,] _gradResult;
+        private readonly float[,] _gradMags;
+        private readonly float[,] _weights;
+        private readonly float[,] _centerScores;
+
+        private readonly int _rows;
+        private readonly int _cols;
+
+        internal EyeCenterEstimator(int rows, int cols)
+        {
+            _imageBlurred = new float[rows, cols];
+            _gradResultX = new float[rows, cols];
+            _gradResultY = new float[rows, cols];
+            _gradResult = new float[rows, cols, 2];
+            _gradMags = new float[rows, cols];
+            _weights = new float[rows, cols];
+            _centerScores = new float[rows, cols];
+
+            _rows = rows;
+            _cols = cols;
+        }
+
         /// <summary>
         /// Estimates an eye center location from an image. The array passed in will be modified.
         /// 
@@ -13,46 +39,42 @@ namespace Vectoreyes.EyeCenters
         /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
         /// </summary>
         /// <param name="image">The image to search.</param>
-        /// <param name="rows">The number of rows in the image.</param>
-        /// <param name="cols">The number of columns in the image.</param>
         /// <returns>An eye center estimate.</returns>
-        public static EyeCenter Estimate(float[] image, int rows, int cols)
+        public EyeCenter Estimate(float[] image)
         {
             // We can't meaningfully calculate anything on an image this small.
-            if (rows < 4 && cols < 4)
+            if (_rows < 4 && _cols < 4)
             {
                 return new EyeCenter(-1, -1);
             }
-            
+
+            // Zero scores
+            Array.Clear(_centerScores, 0, _centerScores.Length);
+
             // Blur step:
-            var imageBlurred = new float[rows, cols];
-            GaussianBlur.Blur(image, imageBlurred, rows, cols, (int)Math.Sqrt(Math.Min(rows, cols)) / 2); // Radius chosen experimentally
+            GaussianBlur.Blur(image, _imageBlurred, _rows, _cols, (int)Math.Sqrt(Math.Min(_rows, _cols)) / 2); // Radius chosen experimentally
 
             // Calculate gradients, gradient magnitude mean, and gradient magnitude std
-            var gradResultX = new float[rows, cols];
-            var gradResultY = new float[rows, cols];
-            CV.CentralDifferenceGradientX(imageBlurred, gradResultX);
-            CV.CentralDifferenceGradientY(imageBlurred, gradResultY);
-
-            var gradMags = new float[rows, cols];
-            var gradResult = new float[rows, cols, 2];
-            for (var r = 0; r < rows; r++)
+            CV.CentralDifferenceGradientX(_imageBlurred, _gradResultX);
+            CV.CentralDifferenceGradientY(_imageBlurred, _gradResultY);
+            
+            for (var r = 0; r < _rows; r++)
             {
-                for (var c = 0; c < cols; c++)
+                for (var c = 0; c < _cols; c++)
                 {
-                    gradMags[r, c] = (float)Math.Sqrt(gradResultX[r, c] * gradResultX[r, c] + gradResultY[r, c] * gradResultY[r, c]);
+                    _gradMags[r, c] = (float)Math.Sqrt(_gradResultX[r, c] * _gradResultX[r, c] + _gradResultY[r, c] * _gradResultY[r, c]);
                 }
             }
 
-            var gradMagMean = Utils.Mean2D(gradMags);
-            var gradMagStd = Utils.Std2D(gradMags, gradMagMean);
+            var gradMagMean = Utils.Mean2D(_gradMags);
+            var gradMagStd = Utils.Std2D(_gradMags, gradMagMean);
             var gradThreshold = 0.9f * gradMagStd + gradMagMean;
 
-            for (var r = 0; r < rows; r++)
+            for (var r = 0; r < _rows; r++)
             {
-                for (var c = 0; c < cols; c++)
+                for (var c = 0; c < _cols; c++)
                 {
-                    var gradMag = gradMags[r, c];
+                    var gradMag = _gradMags[r, c];
 
                     // Ignore all gradients below a threshold
                     if (gradMag < gradThreshold)
@@ -61,14 +83,13 @@ namespace Vectoreyes.EyeCenters
                     }
 
                     // Scale gradients to unit length
-                    gradResult[r, c, 0] = gradResultX[r, c] / gradMag;
-                    gradResult[r, c, 1] = gradResultY[r, c] / gradMag;
+                    _gradResult[r, c, 0] = _gradResultX[r, c] / gradMag;
+                    _gradResult[r, c, 1] = _gradResultY[r, c] / gradMag;
                 }
             }
 
             // Calculate weights
-            var weights = new float[rows, cols];
-            CV.Negative(imageBlurred, weights);
+            CV.Negative(_imageBlurred, _weights);
 
             // Predict eye center:
             // To save time, we only calculate the objective for every Kth column/row,
@@ -79,15 +100,14 @@ namespace Vectoreyes.EyeCenters
             // square rooting the step size and calculating scores within a predicted region.
             // This saves us a huge number of Score() calculations and allows us to
             // calculate eye centers in high-resolution images in realistic amounts of time.
-            var initialStep = (int)Math.Sqrt(rows * cols);
-            
+            var initialStep = (int)Math.Sqrt(_rows * _cols);
+
             // Initial step scoring
-            var centerScores = new float[rows, cols];
-            for (var r = 0; r < rows; r += initialStep)
+            for (var r = 0; r < _rows; r += initialStep)
             {
-                for (var c = 0; c < cols; c += initialStep)
+                for (var c = 0; c < _cols; c += initialStep)
                 {
-                    centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
+                    _centerScores[r, c] = Score(_weights, _gradResult, _rows, _cols, r, c);
                 }
             }
 
@@ -96,27 +116,27 @@ namespace Vectoreyes.EyeCenters
             // accuracy for a significant speedup on larger images.
             for (var lastStep = initialStep; lastStep > 2; lastStep = (int)Math.Sqrt(lastStep))
             {
-                var (localMaxR, localMaxC) = Utils.Argmax2D(centerScores);
-                var localMaxVal = centerScores[localMaxR, localMaxC];
+                var (localMaxR, localMaxC) = Utils.Argmax2D(_centerScores);
+                var localMaxVal = _centerScores[localMaxR, localMaxC];
                 var approxThreshold = localMaxVal * 0.999999f;
                 var step = (int)Math.Sqrt(lastStep);
-                for (var r = 0; r < rows; r += step)
+                for (var r = 0; r < _rows; r += step)
                 {
-                    for (var c = 0; c < cols; c += step)
+                    for (var c = 0; c < _cols; c += step)
                     {
-                        var scoreR = Math.Min(rows - 1, (int)(Math.Round(r / (float)lastStep) * lastStep));
-                        var scoreC = Math.Min(cols - 1, (int)(Math.Round(c / (float)lastStep) * lastStep));
-                        if (centerScores[scoreR, scoreC] > approxThreshold)
+                        var scoreR = Math.Min(_rows - 1, (int)(Math.Round(r / (float)lastStep) * lastStep));
+                        var scoreC = Math.Min(_cols - 1, (int)(Math.Round(c / (float)lastStep) * lastStep));
+                        if (_centerScores[scoreR, scoreC] > approxThreshold)
                         {
-                            centerScores[r, c] = Score(weights, gradResult, rows, cols, r, c);
+                            _centerScores[r, c] = Score(_weights, _gradResult, _rows, _cols, r, c);
                         }
                     }
                 }
             }
-            
+
             // Calculate final estimated center
-            var (maxR, maxC) = Utils.Argmax2D(centerScores);
-            
+            var (maxR, maxC) = Utils.Argmax2D(_centerScores);
+
             return new EyeCenter(maxC, maxR);
         }
 

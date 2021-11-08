@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Net.Http;
+using Vectoreyes.EyeCenters;
 
 namespace Vectoreyes.Debug
 {
@@ -15,12 +16,25 @@ namespace Vectoreyes.Debug
                 "https://raw.githubusercontent.com/karashiiro/justeyecenters/main/example/eyes/0.jpg").GetAwaiter().GetResult();
             
             var srcImage = new Bitmap(Image.FromStream(imageRaw));
+            var buf = Utils.Bitmap2GreyArray(srcImage);
             Console.WriteLine("Target dimensions: ({0}, {1})", srcImage.Width, srcImage.Height);
 
-            var timer = new Stopwatch();
-            timer.Start();
-            var eyeCenter = new VectoreyesEstimator().EstimateCenter(srcImage);
-            timer.Stop();
+            var estimator = new VectoreyesEstimator().CreateReusableEstimator(srcImage.Height, srcImage.Width);
+
+            var timer1 = new Stopwatch();
+            timer1.Start();
+            estimator.Estimate(buf);
+            timer1.Stop();
+            Console.WriteLine("Calculation time: {0}ms", timer1.ElapsedMilliseconds);
+
+            var eyeCenter = new EyeCenter(-1, -1);
+            var timer2 = new Stopwatch();
+            timer2.Start();
+            for (var i = 0; i < 100; i++)
+            {
+                eyeCenter = estimator.Estimate(buf);
+            }
+            timer2.Stop();
 
             for (var i = -1; i <= 1; i++)
             {
@@ -32,7 +46,7 @@ namespace Vectoreyes.Debug
             srcImage.Save("output.bmp");
 
             Console.WriteLine("Predicted center: ({0}, {1})", eyeCenter.CenterX, eyeCenter.CenterY);
-            Console.WriteLine("Calculation time: {0}ms", timer.ElapsedMilliseconds);
+            Console.WriteLine("Calculation time (100x): {0}ms", timer2.ElapsedMilliseconds);
         }
     }
 }
