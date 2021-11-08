@@ -16,11 +16,17 @@ namespace Vectoreyes.EyeCenters
         /// <returns>An eye center estimate.</returns>
         public static EyeCenter Estimate(float[,] image)
         {
-            var beforeScoringLoop = new Stopwatch();
-            beforeScoringLoop.Start();
-            
             var rows = image.GetLength(0);
             var cols = image.GetLength(1);
+
+            // We can't meaningfully calculate anything on an image this small.
+            if (rows < 4 || cols < 4)
+            {
+                return new EyeCenter(-1, -1);
+            }
+
+            var beforeScoringLoop = new Stopwatch();
+            beforeScoringLoop.Start();
 
             // Blur step:
             // Create just one extra matrix that we reuse for performance.
@@ -84,7 +90,14 @@ namespace Vectoreyes.EyeCenters
 
             // To save time, we only calculate the objective for every 16th column/row.
             // This gives us a rough approximation that we can refine later.
-            const int initialStep = 16;
+            var initialStep = 16;
+
+            // Decrease the initial step if the input image is too small
+            while (initialStep > rows || initialStep > cols)
+            {
+                initialStep /= 2;
+            }
+
             var centerScores = new float[rows, cols];
             for (var r = 0; r < rows; r += initialStep)
             {
