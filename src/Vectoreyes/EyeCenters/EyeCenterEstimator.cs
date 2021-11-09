@@ -130,8 +130,8 @@ namespace Vectoreyes.EyeCenters
                                     }
 
                                     // Search for better and better objectives within regions with high surrounding
-                                    // objectives. We stop at a step of 2 (last step = 4), sacrificing negligible
-                                    // accuracy for a significant speedup on larger images.
+                                    // objectives. We stop at a step of 2, sacrificing negligible accuracy for a
+                                    // significant speedup on larger images.
                                     for (var lastStep = initialStep; lastStep > 2; lastStep = (int)Math.Sqrt(lastStep))
                                     {
                                         var (localMaxR, localMaxC) = Utils.Argmax2D(centerScores, _rows, _cols);
