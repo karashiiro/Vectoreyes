@@ -5,32 +5,28 @@ namespace Vectoreyes
 {
     internal static class Utils
     {
-        public static float Std2D(float[,] x, float mean)
+        public static float Std2D(float[] x, int rows, int cols, float mean)
         {
-            var rows = x.GetLength(0);
-            var cols = x.GetLength(1);
             var std = 0f;
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    std += (x[r, c] - mean) * (x[r, c] - mean);
+                    std += (x[r * cols + c] - mean) * (x[r * cols + c] - mean);
                 }
             }
             std = (float)Math.Sqrt(std / (rows * cols - 1));
             return std;
         }
 
-        public static float Mean2D(float[,] x)
+        public static float Mean2D(float[] x, int rows, int cols)
         {
-            var rows = x.GetLength(0);
-            var cols = x.GetLength(1);
             var mean = 0f;
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    mean += x[r, c];
+                    mean += x[r * cols + c];
                 }
             }
             mean /= rows * cols;
@@ -42,10 +38,8 @@ namespace Vectoreyes
         /// </summary>
         /// <param name="x">The input 2D array.</param>
         /// <returns>The position, in (row, col) order.</returns>
-        public static (int, int) Argmax2D(float[,] x)
+        public static (int, int) Argmax2D(float[] x, int rows, int cols)
         {
-            var rows = x.GetLength(0);
-            var cols = x.GetLength(1);
             var maxVal = 0f;
             var maxR = -1;
             var maxC = -1;
@@ -53,9 +47,9 @@ namespace Vectoreyes
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    if (x[r, c] > maxVal)
+                    if (x[r * cols + c] > maxVal)
                     {
-                        maxVal = x[r, c];
+                        maxVal = x[r * cols + c];
                         maxR = r;
                         maxC = c;
                     }
@@ -82,36 +76,31 @@ namespace Vectoreyes
             return image;
         }
 
-        public static void SaveScoresImage(float[,] centerScores, string filename)
+        public static void SaveScoresImage(float[] centerScores, int rows, int cols, string filename)
         {
-            var (maxR, maxC) = Utils.Argmax2D(centerScores);
-            var maxVal = centerScores[maxR, maxC];
-
-            var rows = centerScores.GetLength(0);
-            var cols = centerScores.GetLength(1);
+            var (maxR, maxC) = Argmax2D(centerScores, rows, cols);
+            var maxVal = centerScores[maxR * cols + maxC];
             
             var bmp = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    var px = (int)(255 * centerScores[r, c] / maxVal);
+                    var px = (int)(255 * centerScores[r * cols + c] / maxVal);
                     bmp.SetPixel(c, r, Color.FromArgb(px, 255 - px, 0));
                 }
             }
             bmp.Save(filename);
         }
 
-        public static void SaveGreyImage(float[,] image, string filename)
+        public static void SaveGreyImage(float[] image, int rows, int cols, string filename)
         {
-            var rows = image.GetLength(0);
-            var cols = image.GetLength(1);
             var bmp = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    var px = (int)image[r, c];
+                    var px = (int)image[r * cols + c];
                     bmp.SetPixel(c, r, Color.FromArgb(px, px, px));
                 }
             }
