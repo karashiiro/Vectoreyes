@@ -46,13 +46,5 @@
                 dst[r * cols + (cols - 1)] = src[r * cols + (cols - 1)] - src[r * cols + (cols - 2)];
             }
         }
-
-        public static void Negative(float[] src, float[] dst)
-        {
-            for (var i = 0; i < src.Length; i++)
-            {
-                dst[i] = 255 - src[i];
-            }
-        }
     }
 }

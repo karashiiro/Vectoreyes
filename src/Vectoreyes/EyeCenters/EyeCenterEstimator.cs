@@ -12,7 +12,6 @@ namespace Vectoreyes.EyeCenters
         private readonly float[] _gradResultY;
         private readonly float[] _gradResult;
         private readonly float[] _gradMags;
-        private readonly float[] _weights;
         private readonly float[] _centerScores;
 
         private readonly int _rows;
@@ -26,7 +25,6 @@ namespace Vectoreyes.EyeCenters
             _gradResultY = new float[indices];
             _gradResult = new float[indices * 2];
             _gradMags = new float[indices];
-            _weights = new float[indices];
             _centerScores = new float[indices];
 
             _rows = rows;
@@ -89,9 +87,6 @@ namespace Vectoreyes.EyeCenters
                 }
             }
 
-            // Calculate weights
-            CV.Negative(_imageBlurred, _weights);
-
             // Predict eye center:
             // To save time, we only calculate the objective for every Kth column/row,
             // where K is the square root of the product of the rows and columns in the
@@ -108,7 +103,7 @@ namespace Vectoreyes.EyeCenters
             {
                 for (var c = 0; c < _cols; c += initialStep)
                 {
-                    _centerScores[r * _cols + c] = Score(_weights, _gradResult, _rows, _cols, r, c);
+                    _centerScores[r * _cols + c] = Score(_gradResult, _rows, _cols, r, c);
                 }
             }
 
@@ -129,7 +124,7 @@ namespace Vectoreyes.EyeCenters
                         var scoreC = Math.Min(_cols - 1, (int)(Math.Round(c / (float)lastStep) * lastStep));
                         if (_centerScores[scoreR * _cols + scoreC] > approxThreshold)
                         {
-                            _centerScores[r * _cols + c] = Score(_weights, _gradResult, _rows, _cols, r, c);
+                            _centerScores[r * _cols + c] = Score(_gradResult, _rows, _cols, r, c);
                         }
                     }
                 }
@@ -149,7 +144,7 @@ namespace Vectoreyes.EyeCenters
         /// Implemented based on Timm, F. and Barth, E. (2011). "Accurate eye centre localisation by means of gradients",
         /// with modifications from https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv.
         /// </summary>
-        private static float Score(float[] weights, float[] gradient, int rows, int cols, int centerR, int centerC)
+        private static float Score(float[] gradient, int rows, int cols, int centerR, int centerC)
         {
             var score = 0f;
             for (var r = 0; r < rows; r++)
@@ -195,7 +190,10 @@ namespace Vectoreyes.EyeCenters
                     // The squaring step may also be removed at this point, since our dot products
                     // are all greater than or equal to 0. In fact, doing so appears to improve
                     // accuracy.
-                    score += dg * weights[r * cols + c];
+                    //
+                    // I'm also choosing to remove the pixel intensity weight here, since it reduces
+                    // accuracy when there are reflections on the iris.
+                    score += dg;
                 }
             }
 
