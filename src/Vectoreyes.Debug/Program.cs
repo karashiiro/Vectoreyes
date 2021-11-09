@@ -19,7 +19,7 @@ namespace Vectoreyes.Debug
             var buf = Utils.Bitmap2GreyArray(srcImage);
             Console.WriteLine("Target dimensions: ({0}, {1})", srcImage.Width, srcImage.Height);
 
-            using var estimator = VectoreyesEstimator.CreateReusableEstimator(srcImage.Height, srcImage.Width);
+            var estimator = VectoreyesEstimator.CreateReusableEstimator(srcImage.Height, srcImage.Width);
 
             var timer1 = new Stopwatch();
             timer1.Start();
