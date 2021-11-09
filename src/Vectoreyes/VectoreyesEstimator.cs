@@ -14,7 +14,8 @@ namespace Vectoreyes
         /// <returns>The predicted eye center.</returns>
         public static EyeCenter EstimateCenter(Bitmap image)
         {
-            var greyImage = Utils.Bitmap2GreyArray(image);
+            var greyImage = new float[image.Height * image.Width];
+            Utils.Bitmap2GreyArray(image, greyImage);
             return EstimateCenter(greyImage, image.Height, image.Width);
         }
 
@@ -55,7 +56,8 @@ namespace Vectoreyes
         /// <returns>The predicted gaze and associated eye center.</returns>
         public static Gaze EstimateGaze(Bitmap image)
         {
-            var greyImage = Utils.Bitmap2GreyArray(image);
+            var greyImage = new float[image.Height * image.Width];
+            Utils.Bitmap2GreyArray(image, greyImage);
             return EstimateGaze(greyImage, image.Height, image.Width);
         }
 
@@ -72,6 +74,29 @@ namespace Vectoreyes
         public static Gaze EstimateGaze(float[] image, int rows, int cols)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Converts a source bitmap into a floating-point greyscale array.
+        /// </summary>
+        /// <param name="src">The source bitmap.</param>
+        /// <param name="dst">The destination array.</param>
+        public void BitmapToFloatGrey(Bitmap src, float[] dst)
+        {
+            Utils.Bitmap2GreyArray(src, dst);
+        }
+
+        /// <summary>
+        /// Converts a byte greyscale array into a floating-point greyscale array.
+        /// </summary>
+        /// <param name="src">The source array.</param>
+        /// <param name="dst">The destination array.</param>
+        public void ByteGreyToFloatGrey(byte[] src, float[] dst)
+        {
+            for (var i = 0; i < src.Length; i++)
+            {
+                dst[i] = (float)src[i] / 255;
+            }
         }
     }
 }

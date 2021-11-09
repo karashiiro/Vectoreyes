@@ -16,7 +16,8 @@ namespace Vectoreyes.Debug
                 "https://raw.githubusercontent.com/karashiiro/justeyecenters/main/example/eyes/0.jpg").GetAwaiter().GetResult();
             
             var srcImage = new Bitmap(Image.FromStream(imageRaw));
-            var buf = Utils.Bitmap2GreyArray(srcImage);
+            var buf = new float[srcImage.Height * srcImage.Width];
+            Utils.Bitmap2GreyArray(srcImage, buf);
             Console.WriteLine("Target dimensions: ({0}, {1})", srcImage.Width, srcImage.Height);
 
             var estimator = VectoreyesEstimator.CreateReusableEstimator(srcImage.Height, srcImage.Width);

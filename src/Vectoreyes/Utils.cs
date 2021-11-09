@@ -59,21 +59,18 @@ namespace Vectoreyes
             return (maxR, maxC);
         }
 
-        public static float[] Bitmap2GreyArray(Bitmap srcImage)
+        public static void Bitmap2GreyArray(Bitmap src, float[] dst)
         {
-            var image = new float[srcImage.Height * srcImage.Width];
-            for (var r = 0; r < srcImage.Height; r++)
+            for (var r = 0; r < src.Height; r++)
             {
-                for (var c = 0; c < srcImage.Width; c++)
+                for (var c = 0; c < src.Width; c++)
                 {
-                    var px = srcImage.GetPixel(c, r);
+                    var px = src.GetPixel(c, r);
 
                     // https://en.wikipedia.org/wiki/Grayscale#Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
-                    image[r * srcImage.Width + c] = px.R * 0.2126f + px.G * 0.7152f + px.B * 0.0722f;
+                    dst[r * src.Width + c] = px.R * 0.2126f + px.G * 0.7152f + px.B * 0.0722f;
                 }
             }
-
-            return image;
         }
 
         public static void SaveScoresImage(float* centerScores, int rows, int cols, string filename)
