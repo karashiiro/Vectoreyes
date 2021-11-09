@@ -83,8 +83,8 @@ namespace Vectoreyes.EyeCenters
                     }
 
                     // Scale gradients to unit length
-                    _gradResult[r, c, 0] = _gradResultX[r, c] / gradMag;
                     _gradResult[r, c, 1] = _gradResultY[r, c] / gradMag;
+                    _gradResult[r, c, 0] = _gradResultX[r, c] / gradMag;
                 }
             }
 
@@ -155,8 +155,8 @@ namespace Vectoreyes.EyeCenters
             {
                 for (var c = 0; c < cols; c++)
                 {
-                    var gX = gradient[r, c, 0];
                     var gY = gradient[r, c, 1];
+                    var gX = gradient[r, c, 0];
                     if (gX + gY == 0)
                     {
                         continue;
