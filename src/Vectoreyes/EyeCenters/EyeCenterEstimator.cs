@@ -31,21 +31,17 @@ namespace Vectoreyes.EyeCenters
             var indices = rows * cols;
 
             _hImageBlurred = GCHandle.Alloc(new float[indices], GCHandleType.Pinned);
-            _imageBlurred = (float*)_hImageBlurred.AddrOfPinnedObject();
-
             _hGradResultX = GCHandle.Alloc(new float[indices], GCHandleType.Pinned);
-            _gradResultX = (float*)_hGradResultX.AddrOfPinnedObject();
-
             _hGradResultY = GCHandle.Alloc(new float[indices], GCHandleType.Pinned);
-            _gradResultY = (float*)_hGradResultY.AddrOfPinnedObject();
-
             _hGradResult = GCHandle.Alloc(new float[indices * 2], GCHandleType.Pinned);
-            _gradResult = (float*)_hGradResult.AddrOfPinnedObject();
-
             _hGradMags = GCHandle.Alloc(new float[indices], GCHandleType.Pinned);
-            _gradMags = (float*)_hGradMags.AddrOfPinnedObject();
-
             _hCenterScores = GCHandle.Alloc(new float[indices], GCHandleType.Pinned);
+
+            _imageBlurred = (float*)_hImageBlurred.AddrOfPinnedObject();
+            _gradResultX = (float*)_hGradResultX.AddrOfPinnedObject();
+            _gradResultY = (float*)_hGradResultY.AddrOfPinnedObject();
+            _gradResult = (float*)_hGradResult.AddrOfPinnedObject();
+            _gradMags = (float*)_hGradMags.AddrOfPinnedObject();
             _centerScores = (float*)_hCenterScores.AddrOfPinnedObject();
 
             _rows = rows;
