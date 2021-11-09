@@ -30,7 +30,7 @@ namespace Vectoreyes.Debug
             var eyeCenter = new EyeCenter(-1, -1);
             var timer2 = new Stopwatch();
             timer2.Start();
-            for (var i = 0; i < 100; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 eyeCenter = estimator.Estimate(buf);
             }
@@ -46,7 +46,7 @@ namespace Vectoreyes.Debug
             srcImage.Save("output.bmp");
 
             Console.WriteLine("Predicted center: ({0}, {1})", eyeCenter.CenterX, eyeCenter.CenterY);
-            Console.WriteLine("Calculation time (100x): {0}ms", timer2.ElapsedMilliseconds);
+            Console.WriteLine("Calculation time (1000x): {0}ms", timer2.ElapsedMilliseconds);
         }
     }
 }
