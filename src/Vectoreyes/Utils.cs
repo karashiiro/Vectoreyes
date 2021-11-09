@@ -3,9 +3,9 @@ using System.Drawing;
 
 namespace Vectoreyes
 {
-    internal static class Utils
+    internal static unsafe class Utils
     {
-        public static float Std2D(float[] x, int rows, int cols, float mean)
+        public static float Std2D(float* x, int rows, int cols, float mean)
         {
             var std = 0f;
             for (var r = 0; r < rows; r++)
@@ -19,7 +19,7 @@ namespace Vectoreyes
             return std;
         }
 
-        public static float Mean2D(float[] x, int rows, int cols)
+        public static float Mean2D(float* x, int rows, int cols)
         {
             var mean = 0f;
             for (var r = 0; r < rows; r++)
@@ -38,7 +38,7 @@ namespace Vectoreyes
         /// </summary>
         /// <param name="x">The input 2D array.</param>
         /// <returns>The position, in (row, col) order.</returns>
-        public static (int, int) Argmax2D(float[] x, int rows, int cols)
+        public static (int, int) Argmax2D(float* x, int rows, int cols)
         {
             var maxVal = 0f;
             var maxR = -1;
@@ -76,7 +76,7 @@ namespace Vectoreyes
             return image;
         }
 
-        public static void SaveScoresImage(float[] centerScores, int rows, int cols, string filename)
+        public static void SaveScoresImage(float* centerScores, int rows, int cols, string filename)
         {
             var (maxR, maxC) = Argmax2D(centerScores, rows, cols);
             var maxVal = centerScores[maxR * cols + maxC];
@@ -93,7 +93,7 @@ namespace Vectoreyes
             bmp.Save(filename);
         }
 
-        public static void SaveGreyImage(float[] image, int rows, int cols, string filename)
+        public static void SaveGreyImage(float* image, int rows, int cols, string filename)
         {
             var bmp = new Bitmap(cols, rows);
             for (var r = 0; r < rows; r++)

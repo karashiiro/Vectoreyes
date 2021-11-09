@@ -1,13 +1,13 @@
 ﻿namespace Vectoreyes
 {
-    internal static class CV
+    internal static unsafe class CV
     {
         // https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv#the-gradient-algorithm
         // https://www.mathworks.com/help/images/ref/imgradient.html
         // The author of this blog post chooses to simply transpose the resultant gradient in the X direction,
         // but the gradients in either direction aren't necessarily equivalent. It's unclear if the author
         // chose to do that because it didn't matter or because they weren't aware.
-        public static void CentralDifferenceGradientY(float[] src, float[] dst, int rows, int cols)
+        public static void CentralDifferenceGradientY(float* src, float* dst, int rows, int cols)
         {
             for (var c = 0; c < cols; c++)
             {
@@ -33,7 +33,7 @@
 
         // https://thume.ca/projects/2012/11/04/simple-accurate-eye-center-tracking-in-opencv#the-gradient-algorithm
         // https://www.mathworks.com/help/images/ref/imgradient.html
-        public static void CentralDifferenceGradientX(float[] src, float[] dst, int rows, int cols)
+        public static void CentralDifferenceGradientX(float* src, float* dst, int rows, int cols)
         {
             for (var r = 0; r < rows; r++)
             {
