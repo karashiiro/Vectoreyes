@@ -95,7 +95,7 @@ namespace Vectoreyes
         {
             for (var i = 0; i < src.Length; i++)
             {
-                dst[i] = (float)src[i] / 255;
+                dst[i] = src[i];
             }
         }
     }
